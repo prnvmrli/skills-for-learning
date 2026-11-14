@@ -24,7 +24,7 @@ The three course skills depend on the shared files in `skills/course/`, so insta
 Inside Claude Code:
 
 ```
-/plugin marketplace add iannbing/skills-for-learning
+/plugin marketplace add prnvmrli/skills-for-learning
 /plugin install skills-for-learning@skills-for-learning
 ```
 
@@ -90,4 +90,4 @@ MIT; see [LICENSE](./LICENSE). `skills/course/upstream/` is from [mattpocock/ski
 
 ## Contributing
 
-Issues and PRs welcome at <https://github.com/iannbing/skills-for-learning>.
+Issues and PRs welcome at <https://github.com/prnvmrli/skills-for-learning>.
