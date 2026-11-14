@@ -1,19 +1,25 @@
 # skills-for-learning
 
-Four Claude Code skills that cover the full learning loop — understand what exists, and learn what's new.
+Claude Code skills for learning: three ways to start a course, one engine that runs it, and two one-shot explainers.
 
-| Skill                                          | What it does                                                                                                                                                                                                                           |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`explain`](./skills/explain/SKILL.md)         | Structures any explanation into three sections: **High-Level**, **Break-Down**, **Glossary**. Use for "what is…", "how does…work", "ELI5", or "walk me through…" questions.                                                            |
-| [`walkthrough`](./skills/walkthrough/SKILL.md) | Writes a revealing architectural walkthrough — a document that re-creates the experience of making a design decision instead of summarising it. Built for junior engineers reading about a PR, refactor, or architecture.              |
-| [`tutorial`](./skills/tutorial/SKILL.md)       | Generates a self-contained learning repository for any software topic — theory with Mermaid diagrams plus a practice project with milestone-based TODOs the learner builds commit-by-commit.                                           |
-| [`guide`](./skills/guide/SKILL.md)             | Coaches the learner through a `tutorial` repo. Acts as a patient senior-engineer mentor — asks questions, escalates hints, tracks weak points. Does NOT give answers unless explicitly asked.                                          |
+| Skill | What it does |
+| --- | --- |
+| [`project-course`](./skills/project-course/SKILL.md) | **You have a project idea and know nothing.** Designs a course in which every module builds part of *your* project. |
+| [`codebase-course`](./skills/codebase-course/SKILL.md) | **You have an existing codebase.** Teaches what's built, how it's organised, and the concepts underneath, with exercises on the real code. |
+| [`topic-course`](./skills/topic-course/SKILL.md) | **You want to learn a topic.** Designs a project that covers it, or drills for knowledge goals such as interview prep. |
+| [`course`](./skills/course/SKILL.md) | The engine. Continues any course, session after session: recall warm-up, next lesson, practice, coaching with hints instead of answers, and a wrap-up at the end. |
+| [`explain`](./skills/explain/SKILL.md) | Structures a one-off explanation into **High-Level**, **Break-Down**, and **Glossary**. |
+| [`walkthrough`](./skills/walkthrough/SKILL.md) | Writes a document that re-creates the experience of making one design decision, and ends in a graded verdict. |
 
-`explain` and `walkthrough` help you understand code that already exists. `tutorial` and `guide` pair up to help you learn something new — one generates the material, the other coaches you through it without spoiling the answer.
+```
+project-course ─┐
+topic-course ───┼─► set up a workspace ─► course (every later session)
+codebase-course ┘
+```
+
+The three course skills depend on the shared files in `skills/course/`, so install the whole plugin rather than individual skills.
 
 ## Install
-
-### Claude Code plugin marketplace (recommended)
 
 Inside Claude Code:
 
@@ -22,120 +28,65 @@ Inside Claude Code:
 /plugin install skills-for-learning@skills-for-learning
 ```
 
-After install, the skills are available as `/skills-for-learning:explain`, `/skills-for-learning:walkthrough`, `/skills-for-learning:tutorial`, and `/skills-for-learning:guide`. They're also model-invoked — Claude will use them automatically when the request matches.
+The skills are then available as `/skills-for-learning:<skill>`, for example `/skills-for-learning:project-course`. Claude also invokes them on its own when a request matches.
 
-Update later with:
+For local development: `claude --plugin-dir ./skills-for-learning`. Before committing, run `python3 scripts/check_skills.py`. It checks frontmatter, code fences, non-breaking spaces, relative links and anchors, and the plugin JSON.
 
-```
-/plugin marketplace update skills-for-learning
-```
-
-### skills.sh
+## Courses
 
 ```
-npx skills add iannbing/skills-for-learning/explain
-npx skills add iannbing/skills-for-learning/walkthrough
-npx skills add iannbing/skills-for-learning/tutorial
-npx skills add iannbing/skills-for-learning/guide
+/skills-for-learning:project-course a habit-tracker app, I know nothing
+/skills-for-learning:topic-course Riverpod, I'm intermediate in Flutter
+/skills-for-learning:topic-course TLS and certificate pinning, for interviews
+/skills-for-learning:codebase-course ~/code/my-app
+/skills-for-learning:course                  # every session after the first
 ```
 
-### Manual / local install
+Each course lives in a dedicated workspace (default `~/learning/<slug>/`), kept outside the project you're studying. `course` finds it from any subfolder, and from inside the practice project or the codebase.
 
-Clone the repo and either:
+| Path | Holds |
+| --- | --- |
+| `MISSION.md` | Why you're learning. Every lesson traces back to it |
+| `CURRICULUM.md` | Every module, in dependency order, with a coverage table and progress checkboxes |
+| `RESOURCES.md` | Vetted sources. Lessons cite these instead of the model's memory |
+| `lessons/*.html` | Short, interactive, cited lessons with quizzes |
+| `milestones/M*.md` | Each module's practice steps or code exercises, ticked as you go |
+| `learning-records/*.md` | What you've shown you understand, what you struggled with, what you already knew |
+| `GLOSSARY.md`, `reference/` | Canonical terms and cheat sheets |
+| `practice/<project>/` | The project you build. It's its own git repo; you commit the code |
 
-- load as a plugin during development: `claude --plugin-dir ./skills-for-learning`
-- or copy individual skills into your user skills dir:
+How the three course skills work:
 
-  ```bash
-  mkdir -p ~/.claude/skills
-  cp -r skills/explain      ~/.claude/skills/
-  cp -r skills/walkthrough  ~/.claude/skills/
-  cp -r skills/tutorial     ~/.claude/skills/
-  cp -r skills/guide        ~/.claude/skills/
-  ```
+- **`project-course`: project idea → course.** An interview pins down the mission. The idea is cut to an MVP feature list (you confirm it), turned into the concepts each feature needs, and ordered by dependency. You create the project yourself in Module 1.
+- **`topic-course`: topic → project or drills.** The scope comes from the topic's official docs or spec and is cut to your mission. Skill goals get a project; knowledge goals get recall and spoken drills.
+- **`codebase-course`: codebase → course.** It pins the commit, surveys the repo read-only, and sorts what it finds into stack, architecture, and domain concepts. It teaches outside-in, and exercises run in a git worktree for each module, at the pinned commit.
 
-  Installed this way the skills have no namespace prefix — they're just `/explain`, `/walkthrough`, `/tutorial`, and `/guide`.
+A module is only ticked once you pass its checkpoint: a working result, plus recall questions answered without the lesson open. When every module is ticked, you get an expert quiz and a follow-up offer that targets whatever you still struggle with.
 
-## Usage
+### Relationship to `/teach`
 
-### `explain`
+`course` is built on Matt Pocock's [`teach`](https://github.com/mattpocock/skills) skill. That skill is copied verbatim into `skills/course/upstream/`, and our overrides and extensions are layered on top. Updating to a newer upstream is a file copy plus a diff review; see `skills/course/upstream/README.md`. A standalone `/teach` can stay installed alongside this plugin: `course` continues existing `/teach` workspaces without restructuring them.
+
+## `explain`
 
 ```
-/skills-for-learning:explain how does OAuth 2.0 authorization code flow work
+/skills-for-learning:explain how does the OAuth 2.0 authorization code flow work
 ```
 
-Produces:
+High-Level (3–7 bullets plus an ASCII diagram) → Break-Down (components, sequences, real code) → Glossary (domain terms only; dropped if fewer than 3).
 
-1. **High-Level** — 3–7 bullets plus an ASCII flow diagram.
-2. **Break-Down** — components, lifecycles, sequence diagrams. Real code snippets when explaining code.
-3. **Glossary** — domain-specific terms only (no `API`, `HTTP`, `DNS` filler).
-
-Calibrated for a junior engineer — the glossary skips general-computing basics and covers only terms specific to the topic.
-
-### `walkthrough`
+## `walkthrough`
 
 ```
 /skills-for-learning:walkthrough PR #482
-/skills-for-learning:walkthrough src/auth/session.ts
 /skills-for-learning:walkthrough why we moved from Redux to Zustand
 ```
 
-Produces a markdown document at `<git-repo-root>/personal/walkthrough-<slug>.md` that:
-
-- drops the reader into the codebase as a new engineer would find it
-- names the problems precisely before proposing solutions
-- walks through 3–4 realistic alternatives and why each fails with a _specific_ technical reason
-- ends with a graded **Final Verdict** (A+ / A / B / C / D / F) with evidence-backed suggestions
-
-Add `personal/walkthrough-*.md` to your `.gitignore` — these are personal study notes.
-
-### `tutorial`
-
-Run inside an empty directory where you want the learning repo to live.
-
-```
-/skills-for-learning:tutorial GraphQL
-/skills-for-learning:tutorial teach me Kubernetes, intermediate level
-/skills-for-learning:tutorial React Testing Library
-```
-
-Generates `learn-<topic>/` containing:
-
-- `theory/` — three markdown files: core concepts (with Mermaid diagrams), controversies & gotchas, and a 10-question expert quiz
-- `practice/<project>/` — a minimal scaffold plus a milestone-based README with ordered TODOs you check off as you build
-- `.guide/learner-profile.md` — tracks weak points across sessions; feeds follow-up tutorials
-
-If a `learner-profile.md` already exists when you generate a new tutorial, the next tutorial will target your recorded weak points.
-
-### `guide`
-
-Used _inside_ a tutorial repo, when you start working on a practice milestone.
-
-```
-/skills-for-learning:guide I'm starting milestone 2
-/skills-for-learning:guide I'm stuck on step 3.1
-/skills-for-learning:guide here's my code, what do you think? [paste]
-```
-
-Coaching behaviour:
-
-- **You drive.** The skill does not write code for you unless you explicitly say "show me".
-- **Escalating hints** — reframe → narrow → point → demonstrate → explain. You never hit a dead end, but you also don't get spoonfed.
-- **Logs every struggle** and conceptual mistake to `.guide/learner-profile.md`, so follow-up tutorials from the `tutorial` skill can target your weak spots.
-- **Marks steps done** in the practice README as you complete them.
-
-## Why these four?
-
-Two complementary loops:
-
-- **Understand what exists** — `explain` decomposes any concept into a reliably-structured form; `walkthrough` teaches the _why_ behind a specific design decision.
-- **Learn what's new** — `tutorial` generates a learning repo from scratch; `guide` coaches you through the practice without giving away the answer.
-
-Each skill encodes the shape of its output so Claude produces consistent, well-organised results every time instead of drifting into walls of text.
+Writes `<repo>/personal/walkthrough-<slug>.md`, kept out of git via `info/exclude`. If a `codebase-course` exists for the repo, it goes into that workspace instead. Order: Opening → Name the Problems → Consider the Alternatives → design parts → Takeaways → **Final Verdict** (A+ to F).
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT; see [LICENSE](./LICENSE). `skills/course/upstream/` is from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT).
 
 ## Contributing
 

@@ -1,11 +1,11 @@
 ---
 name: explain
-description: Explain any concept, system, codebase, technology, or process using a structured three-section format -- High-Level overview, Break-Down, and Glossary. Use this skill whenever the user asks you to explain, describe, walk through, or help them understand something -- whether it's a piece of code, an architecture, a protocol, a framework, a design pattern, an algorithm, a business process, or any technical or non-technical topic. Also use this skill when the user says things like "what is...", "how does...work", "can you break down...", "help me understand...", "ELI5", or "walk me through...". Even if the user doesn't explicitly say "explain", if the intent is clearly to understand something rather than to build or fix something, use this skill.
+description: Explain a concept, system, piece of code, protocol, or process in one reply, using a structured three-section format -- High-Level, Break-Down, Glossary. Use when the user asks to explain, break down, or help them understand something with several moving parts, or says "explain", "how does...work", "break down", "help me understand", "ELI5", or "walk me through how X works" in conversation. Do not use for quick factual questions that a sentence answers, for learning a topic, project, or codebase across sessions (use `topic-course`, `project-course`, or `codebase-course`), or for a written document on why a design decision was made (use `walkthrough`).
 ---
 
 # Explain Skill
 
-When explaining anything, always structure the response into exactly three sections in this order:
+When explaining anything, structure the response into these three sections, in this order. The Glossary is dropped only when fewer than 3 domain terms appear (see section 3):
 
 1. **High-Level**
 2. **Break-Down**
@@ -124,7 +124,7 @@ The audience is a junior software engineer. They know general programming concep
 - Keep definitions to 1-2 sentences -- concise but complete
 - If a term has a common abbreviation, include both forms
 - For programming keywords/reserved words, use code formatting
-- Aim for 10-20 terms -- enough to cover the domain-specific language without padding with basics
+- Include only as many terms as the explanation actually used -- usually 5-20. If fewer than 3 domain terms appear, drop the Glossary section
 
 **Example structure:**
 
@@ -144,6 +144,7 @@ The audience is a junior software engineer. They know general programming concep
 - **Conciseness over completeness.** Every bullet should earn its place. If a point doesn't help the reader understand the topic, cut it.
 - **Diagrams are not optional.** If the topic involves any kind of flow, relationship, process, hierarchy, or sequence, include a visual. ASCII diagrams are preferred since they render everywhere.
 - **Adapt depth to complexity.** A simple concept like "what is a variable" needs a shorter Break-Down than "how does Kubernetes networking work". Scale the sections proportionally.
+- **Facts must be checkable.** For version-specific APIs or fast-moving tools, check the installed version or the official docs before you state behaviour, and link the source.
 - **Glossary should cover domain-specific terms only.** After writing all three sections, re-read the High-Level and Break-Down and check that every domain-specific term, non-obvious acronym, or context-specific keyword has a Glossary entry. Do not pad the glossary with general computing terms a junior software engineer already knows (API, HTTP, CLI, etc.). The glossary should feel targeted, not exhaustive.
 - **When explaining code:** include short, focused code snippets in the Break-Down section alongside the bullets. Don't dump entire files -- show the relevant 3-10 lines.
 - **When explaining systems/architectures:** the High-Level diagram should show the major components and their connections. The Break-Down diagrams should zoom into individual components or interactions.

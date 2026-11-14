@@ -1,6 +1,6 @@
 ---
 name: walkthrough
-description: Write a revealing architectural walkthrough as educational material — for a PR, design decision, code structure, or feature. Use when the user wants to create learning material for junior engineers, explain *why* decisions were made, or document the reasoning behind an architecture. Trigger on "walkthrough", "write a walkthrough", "educational material", "explain the decision", "why was this designed this way", or when asked to produce a document that teaches through re-experiencing a decision rather than summarising it.
+description: Write a revealing architectural walkthrough as educational material — for a PR, design decision, code structure, or feature. Use when the user wants to create learning material for junior engineers, explain *why* decisions were made, or document the reasoning behind an architecture. Trigger on "walkthrough", "write a walkthrough", "educational material", "explain the decision", "why was this designed this way", or when asked to produce a document that teaches through re-experiencing a decision rather than summarising it. Not for a conversational "walk me through how X works"; use `explain` for that.
 ---
 
 # Walkthrough Skill
@@ -9,7 +9,13 @@ Produce a revealing, educational walkthrough document written for junior enginee
 
 **Input**: A PR number, file path, feature name, design decision, or architectural concept. Read the actual code before writing — never write from PR descriptions alone.
 
-**Output**: A well-structured markdown document saved to `<git-repo-root>/personal/walkthrough-<subject-slug>.md`. These are personal study notes — add the pattern `walkthrough-*.md` to `.gitignore` if it isn't there already.
+**Output**: A well-structured markdown document saved to `<git-repo-root>/personal/walkthrough-<subject-slug>.md`. These are personal study notes. Keep them out of git without touching the team's `.gitignore`: append `personal/` to the file printed by `git rev-parse --git-path info/exclude` (this also works inside worktrees), unless it's already listed.
+
+**When a course exists for this codebase**, write to the course workspace instead. A course exists when some `~/learning/*/CURRICULUM.md` has a `Codebase:` line whose path matches this repo's root. In that case:
+
+- Save to `<workspace>/reference/walkthrough-<subject-slug>.md`.
+- If the workspace's `NOTES.md` names a different knowledge base (an Obsidian vault, say), follow that instead.
+- Link the walkthrough from the current module's lesson.
 
 ## Approach: Revealing, Not Summarising
 
@@ -25,12 +31,22 @@ The key distinction: a summary tells you what was decided. A walkthrough puts yo
 
 The document must follow this part structure. Scale the number of parts to the complexity of the subject — a small decision might need 4 parts, a large architectural change might need 8. Aim for ~500 words for a focused decision, ~2000+ words for a major architectural change. Let the subject dictate the length, not a formula.
 
-### Required parts (always present):
+Parts always appear in this order:
+
+```
+1. Opening — You Inherit [the Situation]        required
+2. Name the Problems                            required
+3. Consider the Alternatives                    required
+4. Middle parts (design / migration / refactor) as needed, 0–4
+5. What You Should Take Away                    required
+6. Final Verdict                                required
+7. Appendix                                     optional
+```
+
+### Required parts:
 
 **Opening — You Inherit [the Situation]**
 Drop the reader into the codebase as a new engineer. Show the exact files, components, or interfaces they'd encounter first. Use grep results, code snippets, and definitions directly from the codebase. End on a moment of confusion or an unanswered question.
-
-**Closing trio (always the last three parts, in this order):**
 
 **Name the Problems**
 Before solutions, enumerate the problems precisely. Each problem gets a name and a specific description grounded in actual code. Do not accept vague problem statements.
@@ -45,9 +61,9 @@ Walk through 3–4 realistic alternatives in the order an engineer would natural
 **What You Should Take Away**
 3–5 explicit, generalizable lessons. Each lesson must state a principle and ground it in a specific example from the code. Not generic advice — lessons the reader could only have learned from _this_ walkthrough.
 
-### Middle parts (between the opening and the closing trio — include as needed):
+### Middle parts (after the alternatives, before the takeaways — include as needed):
 
-These fill the gap between discovery and verdict. Pick whichever apply to the subject:
+These show how the chosen alternative is actually built. Pick whichever apply to the subject:
 
 - **Design the Data Model** — walk through modelling decisions (table structure, field choices, constraints, indexes) as named decisions with reasons
 - **Design the [Component Tree / State Shape / API Surface]** — same treatment for frontend architecture, API design, or any structural decision
@@ -55,9 +71,9 @@ These fill the gap between discovery and verdict. Pick whichever apply to the su
 - **Integration Without a Big Bang** — if the change involves a migration or rollout strategy, explain the phased approach step by step
 - **[The Specific Extraction / Refactor]** — for any significant code restructuring, dedicate a part to why and how
 
-A small decision might have zero middle parts (opening → closing trio). A major architectural change might have 3–4.
+A small decision might have zero middle parts. A major architectural change might have 3–4.
 
-### Final Verdict (always last before Appendix):
+### Final Verdict (after the takeaways, before any Appendix):
 
 ```markdown
 ## Final Verdict
@@ -68,7 +84,7 @@ A small decision might have zero middle parts (opening → closing trio). A majo
 
 [3–5 bullet points grounding the verdict in specific things from the code, not generalities]
 
-### Suggestions (not blockers) ← include only for grades B or above with gaps
+### Suggestions (not blockers) ← include for grades A to C when there are gaps; D/F gets a rethink direction instead
 
 [Numbered list. Each suggestion must: name the specific gap, quote or reference the specific code involved, explain what could go wrong if left unaddressed, and suggest the concrete fix or follow-up action]
 ```
